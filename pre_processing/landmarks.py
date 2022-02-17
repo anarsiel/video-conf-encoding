@@ -1,16 +1,24 @@
-import cv2
 import os
+
+import cv2
+
 from landmark_detectors.common import get_landmarks_as_points, apply_points_to_image
-from landmark_detectors.dlib5 import __get_mouth_landmarks5
-from landmark_detectors.dlib68 import Landmarks
 
 
 def find_landmarks_on_video(source, dest_dir):
-    # fragmentate(source, dest_dir)
+    fragmentate(source, 'dir')
 
-    files = os.listdir('dir')[:10]
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    files = os.listdir('dir')
     for f in files:
-        find_landmarks_on_img(f)
+        points = find_landmarks_on_img(f)
+
+        f = open(f"{dest_dir}/{f.split('.')[0]}.txt", "w")
+        for point in points:
+            f.write(f"{point[0]} {point[1]}\n")
+        f.close()
 
 
 def fragmentate(source, dest_dir):
@@ -36,9 +44,10 @@ def fragmentate(source, dest_dir):
 def find_landmarks_on_img(img):
     image = cv2.imread(f"dir/{img}")
 
-    points = get_landmarks_as_points(image, "dlib68", Landmarks.MOUTH)
+    points = get_landmarks_as_points(image)
     image = apply_points_to_image(image, points)
     cv2.imwrite(f"dir2/{img}", image)
+    return points
 
 
 # def merge(source):
