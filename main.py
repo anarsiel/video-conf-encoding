@@ -1,3 +1,3 @@
-from pre_processing.landmarks import find_landmarks_on_video
+from pre_processing.audio.audio_features import *
 
-find_landmarks_on_video("resources/videos/two-people-cleaning.mp4", "results")
+get_mfccs_as_plot("resources/audios/example.wav")

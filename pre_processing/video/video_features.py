@@ -1,8 +1,6 @@
 import os
-
 import cv2
-
-from landmark_detectors.common import get_landmarks_as_points, apply_points_to_image
+from pre_processing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image
 
 
 def find_landmarks_on_video(source, dest_dir):
