@@ -1,6 +1,9 @@
 import os
 import cv2
-from pre_processing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image
+import dlib
+
+from pre_processing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image, \
+    __shape_predictor_68
 
 
 def find_landmarks_on_video(source, dest_dir):
@@ -9,9 +12,12 @@ def find_landmarks_on_video(source, dest_dir):
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
+    face_detector = dlib.get_frontal_face_detector()
+    landmark_detector = dlib.shape_predictor(__shape_predictor_68)
+
     files = os.listdir('dir')
     for f in files:
-        points = find_landmarks_on_img(f)
+        points = find_landmarks_on_img(f, face_detector, landmark_detector)
 
         f = open(f"{dest_dir}/{f.split('.')[0]}.txt", "w")
         for point in points:
@@ -35,18 +41,16 @@ def fragmentate(source, dest_dir):
             break
 
         count += 1
-
         success, image = vidcap.read()
 
 
-def find_landmarks_on_img(img):
+def find_landmarks_on_img(img, face_detector, landmark_detector):
     image = cv2.imread(f"dir/{img}")
 
-    points = get_landmarks_as_points(image)
+    points = get_landmarks_as_points(image, face_detector, landmark_detector)
     image = apply_points_to_image(image, points)
     cv2.imwrite(f"dir2/{img}", image)
     return points
-
 
 # def merge(source):
 #     os.system(f"ffmpeg -r 24 -i {source}/frame%01d.jpg -vcodec mpeg4 -y movie.mp4")

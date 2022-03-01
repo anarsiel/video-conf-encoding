@@ -12,4 +12,5 @@ def get_mfccs_as_plot(source):
     mfccs = librosa.feature.mfcc(x, sr=sr)
     plt.figure(figsize=(15, 7))
     librosa.display.specshow(mfccs, sr=sr, x_axis='time')
+    plt.colorbar()
     plt.show()

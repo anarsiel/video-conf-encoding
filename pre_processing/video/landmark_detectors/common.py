@@ -3,12 +3,12 @@ import dlib
 
 from pre_processing.video.landmark_detectors.indexes import Landmarks, landmarks_indexes, dlib5_indexes
 
-__shape_predictor_5 = "landmark_detectors/shape_predictors/shape_predictor_5_face_landmarks.dat"
-__shape_predictor_68 = "landmark_detectors/shape_predictors/shape_predictor_68_face_landmarks.dat"
+__shape_predictor_5 = "pre_processing/video/landmark_detectors/shape_predictors/shape_predictor_5_face_landmarks.dat"
+__shape_predictor_68 = "pre_processing/video/landmark_detectors/shape_predictors/shape_predictor_68_face_landmarks.dat"
 
 
-def get_landmarks_as_points(image, predictor_type="dlib68"):
-    all_faces_landmarks = __face_landmarks(image, __shape_predictor_68)
+def get_landmarks_as_points(image, face_detector, landmark_detector):
+    all_faces_landmarks = __face_landmarks(image, face_detector, landmark_detector)
     return get_only_wanted_points(all_faces_landmarks)
 
 
@@ -32,10 +32,7 @@ def apply_points_to_image(image, points):
     return image
 
 
-def __face_landmarks(image, shape_predictor):
-    face_detector = dlib.get_frontal_face_detector()
-    landmark_detector = dlib.shape_predictor(shape_predictor)
-
+def __face_landmarks(image, face_detector, landmark_detector):
     face_rects = face_detector(image, 0)
 
     all_landmarks = []
