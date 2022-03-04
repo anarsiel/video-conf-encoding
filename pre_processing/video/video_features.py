@@ -1,12 +1,13 @@
 import os
 import cv2
 import dlib
+import numpy as np
 
 from pre_processing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image, \
     __shape_predictor_68
 
 
-def find_landmarks_on_video(source, dest_dir):
+def find_landmarks_on_video(source, dest_dir='landmarks', apply_and_save=False):
     fragmentate(source, 'dir')
 
     if not os.path.exists(dest_dir):
@@ -17,12 +18,12 @@ def find_landmarks_on_video(source, dest_dir):
 
     files = os.listdir('dir')
     for f in files:
-        points = find_landmarks_on_img(f, face_detector, landmark_detector)
+        points = find_landmarks_on_img(f, face_detector, landmark_detector, apply_and_save=apply_and_save)
 
-        f = open(f"{dest_dir}/{f.split('.')[0]}.txt", "w")
-        for point in points:
-            f.write(f"{point[0]} {point[1]}\n")
-        f.close()
+        np.savetxt(f"{dest_dir}/{f.split('.')[0]}.csv", points, delimiter=",")
+
+    frames_count = len(files)
+    return frames_count
 
 
 def fragmentate(source, dest_dir):
@@ -44,12 +45,18 @@ def fragmentate(source, dest_dir):
         success, image = vidcap.read()
 
 
-def find_landmarks_on_img(img, face_detector, landmark_detector):
+def find_landmarks_on_img(img, face_detector, landmark_detector, apply_and_save=False):
     image = cv2.imread(f"dir/{img}")
 
     points = get_landmarks_as_points(image, face_detector, landmark_detector)
-    image = apply_points_to_image(image, points)
-    cv2.imwrite(f"dir2/{img}", image)
+
+    if apply_and_save:
+        tmp_dir = "tmp"
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
+
+        image = apply_points_to_image(image, points)
+        cv2.imwrite(f"{tmp_dir}/{img}", image)
     return points
 
 # def merge(source):

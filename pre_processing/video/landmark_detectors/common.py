@@ -28,7 +28,6 @@ def get_only_wanted_points(all_faces_landmarks):
 def apply_points_to_image(image, points):
     for p in points:
         cv2.circle(image, (int(p[0]), int(p[1])), 2, (255, 0, 0), -1)
-
     return image
 
 

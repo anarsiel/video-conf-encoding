@@ -8,6 +8,8 @@
       <excludeFolder url="file://$MODULE_DIR$/results" />
       <excludeFolder url="file://$MODULE_DIR$/pre_processing/video/landmark_detectors/shape_predictors" />
       <excludeFolder url="file://$MODULE_DIR$/dataset_exmpls" />
+      <excludeFolder url="file://$MODULE_DIR$/landmarks" />
+      <excludeFolder url="file://$MODULE_DIR$/mfccs" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.10 (diploma)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
