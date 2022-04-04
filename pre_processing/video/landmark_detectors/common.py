@@ -13,13 +13,13 @@ def get_landmarks_as_points(image, face_detector, landmark_detector):
 
 
 def get_only_wanted_points(all_faces_landmarks):
-    starting_index = landmarks_indexes[Landmarks.MOUTH][0]
-    ending_index = landmarks_indexes[Landmarks.MOUTH][1]
+    # starting_index = landmarks_indexes[Landmarks.MOUTH][0]
+    # ending_index = landmarks_indexes[Landmarks.MOUTH][1]
 
     points = []
     for face_landmarks in all_faces_landmarks:
         for idx, p in enumerate(face_landmarks.parts()):
-            if starting_index <= idx < ending_index or idx in dlib5_indexes:
+            if idx == 4:
                 points.append((p.x, p.y))
 
     return points

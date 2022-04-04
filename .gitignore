@@ -6,3 +6,16 @@
 /dataset_exmpls/
 /landmarks/
 /mfccs/
+/old/gan_minst/photos/
+/tmp/
+/GRID_sample/
+*.DS_Store
+*/.DS_Store
+.DS_Store
+*/__pycache__/
+*.pyc
+/old/landmarks/
+/old/mfccs/
+/old/tmp/
+/old/dir/
+/dataset/

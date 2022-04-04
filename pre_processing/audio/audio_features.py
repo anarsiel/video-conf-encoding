@@ -3,26 +3,15 @@ import os
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 
 
-def get_mfccs_as_files(source, frames_count, dest_dir="mfccs"):
+def save_mfccs(source, dest_dir):
     x, sr = librosa.load(source)
     mfccs = librosa.feature.mfcc(x, sr=sr)
 
-    chunks = get_chunks(mfccs, frames_count)
-
-    if not os.path.exists(dest_dir):
-        os.makedirs(dest_dir)
-
-    for idx, chunk in enumerate(chunks):
-        np.savetxt(f"{dest_dir}/{idx}{idx+1}.csv", chunk, delimiter=",")
-    return None
-
-
-def get_chunks(mfccs, count):
-    step = mfccs.shape[1] / count
-    step_int = round(step)
-    return [mfccs[:, int(i * step):int(i * step) + step_int] for i in range(0, count - 2)]
+    filename = source.split('/')[-1].split('.')[0]
+    np.savetxt(f"{dest_dir}/{filename}.csv", mfccs, delimiter=",")
 
 
 def get_mfccs_as_plot(source):
