@@ -6,12 +6,18 @@ import numpy as np
 import warnings
 
 
-def save_mfccs(source, dest_dir):
+def get_mfccs(source):
     x, sr = librosa.load(source)
     mfccs = librosa.feature.mfcc(x, sr=sr)
 
-    filename = source.split('/')[-1].split('.')[0]
-    np.savetxt(f"{dest_dir}/{filename}.csv", mfccs, delimiter=",")
+    one_third_len = mfccs.shape[1] // 3
+
+    first, second, third = \
+        mfccs[:, 0*one_third_len:1*one_third_len], \
+        mfccs[:, 1*one_third_len:2*one_third_len], \
+        mfccs[:, 2*one_third_len:3*one_third_len]
+
+    return first, second, third
 
 
 def get_mfccs_as_plot(source):
