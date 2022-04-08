@@ -30,7 +30,7 @@ def save_frames(source, dest_dir, cut=True, apply_landmarks=False):
 
         points = get_landmarks_as_points(image, face_detector, landmark_detector)
 
-        path_for_image = f'{dest_dir}/{source.split("/")[-1].split(".")[0]}_{third_number}'
+        path_for_image = f'{dest_dir}/{source.split("/")[-1].split(".")[0]}_0{third_number + 1}'
         if not os.path.exists(path_for_image):
             os.makedirs(path_for_image)
 
