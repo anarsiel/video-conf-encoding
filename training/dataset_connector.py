@@ -8,6 +8,7 @@ from keras.datasets import mnist
 from matplotlib import pyplot as plt
 from PIL import Image
 import os
+
 np.random.seed(123)
 
 
@@ -25,7 +26,8 @@ def load_dataset(source, for_train=0.8):
         mfccs = load_mfccs(f"{mfccs_dir}/{file}")
         frames = load_frames(f"{frames_dir}/{filename}")
 
-        mfccs = mfccs.reshape(860)  # 9860 = 20*43 + 9000, 20 количество mfcc, 43 - количество mfcc на одну секунду видео
+        mfccs = mfccs.reshape(
+            860)  # 9860 = 20*43 + 9000, 20 количество mfcc, 43 - количество mfcc на одну секунду видео
 
         X, Y = np.concatenate((mfccs, frames[0])), frames[1:].reshape(216000)
 
@@ -49,30 +51,13 @@ def load_frames(source_dir):
 
     all_frames = np.zeros(shape=(25, 9000))
     for idx, file in enumerate(files):
-
-        img = Image.open(f"{source_dir}/{file}")
-        image = np.array(img)
+        image = Image.open(f"{source_dir}/{file}")
+        image = np.array(image)
         image = image.reshape(9000)
 
         all_frames[idx] = image
 
     return all_frames
-
-
-def save_image(image, name="tmp.jpg"):
-    ax = plt.subplot(3, 3, 1)
-    plt.imshow(image.astype("uint8"))
-    plt.axis("off")
-    plt.savefig(name)
-
-
-def read_image(source, image_shape=(50, 60)):
-    image = tf.io.read_file(source)
-    image = tf.io.decode_jpeg(image, channels=3)
-    image = tf.reshape(image, (1, image_shape[0] * image_shape[1], 3))  # (1, 3000, 3)
-    image = tf.cast(image, tf.float32)
-    image = tf.cast(image / 255., tf.float32)
-    return image
 
 
 def check_mfcc_file(file):
@@ -83,6 +68,3 @@ def check_mfcc_file(file):
 def check_frame_file(file):
     elements = file.split('.')
     return len(elements) == 2 and elements[-1] == 'jpg'
-
-
-load_dataset("../dataset")
