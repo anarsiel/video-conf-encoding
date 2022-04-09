@@ -12,6 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/old/dir" />
       <excludeFolder url="file://$MODULE_DIR$/old/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/GRID_sample" />
+      <excludeFolder url="file://$MODULE_DIR$/s1" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.10 (diploma)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

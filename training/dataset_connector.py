@@ -18,42 +18,45 @@ def load_dataset(source, for_train=0.8):
 
     files = [file for file in os.listdir(mfccs_dir) if check_mfcc_file(file)]
 
-    datasetX = np.zeros(shape=(len(files), 9860), dtype=float)  # 25 - число кадров, 9000 = 50 * 60 * 3 - кадр
-    datasetY = np.zeros(shape=(len(files), 216000), dtype=float)  # 24 * 9000
+    frames = np.zeros(shape=(len(files), 24, 50, 60, 3), dtype=float)  # 25 - число кадров, 9000 = 50 * 60 * 3 - кадр
+    mfccs = np.zeros(shape=(len(files), 20, 43), dtype=float)  # 24 * 9000
+    input_frames = np.zeros(shape=(len(files), 50, 60, 3), dtype=float)
     for idx, file in enumerate(sorted(files)):
         filename = file.split('.')[0]
 
-        mfccs = load_mfccs(f"{mfccs_dir}/{file}")
-        frames = load_frames(f"{frames_dir}/{filename}")
+        file_mfccs = load_mfccs(f"{mfccs_dir}/{file}")
+        file_frames = load_frames(f"{frames_dir}/{filename}")
 
-        mfccs = mfccs.reshape(
-            860)  # 9860 = 20*43 + 9000, 20 количество mfcc, 43 - количество mfcc на одну секунду видео
-
-        X, Y = np.concatenate((mfccs, frames[0])), frames[1:].reshape(216000)
-
-        datasetX[idx] = X
-        datasetY[idx] = Y
+        input_frames[idx], frames[idx] = file_frames[0], file_frames[1:]
+        mfccs[idx] = file_mfccs
 
     train_size = int(len(files) * for_train)
 
-    trainX, testX = datasetX[:train_size], datasetX[train_size:]
-    trainY, testY = datasetY[:train_size], datasetY[train_size:]
+    trainMfccs, testMfccs = mfccs[:train_size], mfccs[train_size:]
+    trainFrame, testFrame = input_frames[:train_size], input_frames[train_size:]
+    trainY, testY = frames[:train_size], frames[train_size:]
 
-    return trainX, trainY, testX, testY
+    return trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY
 
 
 def load_mfccs(file):
-    return np.loadtxt(file)
+    mfcc = np.loadtxt(file)
+
+    mean = np.mean(mfcc)
+    std = np.std(mfcc)
+
+    mfcc = (mfcc - mean) / std
+    return mfcc
 
 
 def load_frames(source_dir):
     files = [file for file in os.listdir(source_dir) if check_frame_file(file)]
 
-    all_frames = np.zeros(shape=(25, 9000))
+    all_frames = np.zeros(shape=(25, 50, 60, 3))
     for idx, file in enumerate(files):
         image = Image.open(f"{source_dir}/{file}")
         image = np.array(image)
-        image = image.reshape(9000)
+        image = image / 255.
 
         all_frames[idx] = image
 
