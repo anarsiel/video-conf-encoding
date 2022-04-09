@@ -10,6 +10,9 @@ def get_mfccs(source):
     x, sr = librosa.load(source)
     mfccs = librosa.feature.mfcc(x, sr=sr)
 
+    if mfccs.shape != (20, 129):
+        raise Exception
+
     one_third_len = mfccs.shape[1] // 3
 
     first, second, third = \

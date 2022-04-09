@@ -63,6 +63,8 @@ def fragmentate(source, dest_dir):
         count += 1
         success, image = vidcap.read()
 
+    if count != 75:
+        raise Exception
 
 def get_third_number(x, cnt):
     if x * 3 < cnt:
