@@ -39,34 +39,28 @@ def create_model(save_plot=False):
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    inner_shape = [1] + x.shape[1:]
-
-    x = lr.Flatten()(x)
-    flatten_len = x.shape[1]
-    z = lr.LSTM(128)(au_inputs[:-1])
-
-    x = lr.Dense(3200)(x)
+    z = lr.LSTM(x.shape[1] * x.shape[2])(au_inputs)
+    z = lr.Reshape(x.shape[1:-1] + [1])(z)
     x = lr.Concatenate(-1)([x, z])
-
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-    x = lr.Dense(flatten_len)(x)
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-
-    x = lr.Reshape(inner_shape)(x)
-
-    z = lr.LSTM(inner_shape[1] * inner_shape[2])(au_inputs[:-1])
-    z = lr.Reshape(inner_shape[:3] + [1])(z)
-    x = lr.Concatenate(-1)([x, z])
+    x = lr.Reshape([1] + x.shape[1:])(x)
 
     x = lr.Conv3DTranspose(64, 3, strides=(3, 2, 2), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
+    z = lr.LSTM(x.shape[2] * x.shape[3])(au_inputs)
+    z = lr.Reshape([1] + x.shape[2:-1] + [1])(z)
+    z = lr.Conv3DTranspose(1, x.shape[1], strides=(x.shape[1], 1, 1), padding='same')(z)
+    x = lr.Concatenate(-1)([x, z])
+
     x = lr.Conv3DTranspose(32, 3, strides=(3, 2, 2), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
+
+    z = lr.LSTM(x.shape[2] * x.shape[3])(au_inputs)
+    z = lr.Reshape([1] + x.shape[2:-1] + [1])(z)
+    z = lr.Conv3DTranspose(1, x.shape[1], strides=(x.shape[1], 1, 1), padding='same')(z)
+    x = lr.Concatenate(-1)([x, z])
 
     x = lr.Conv3DTranspose(16, 3, strides=(3, 2, 2), padding='same')(x)
     x = lr.BatchNormalization()(x)
@@ -76,14 +70,14 @@ def create_model(save_plot=False):
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv3D(3, (1, 3, 3), padding='valid')(x)
+    x = lr.Conv3D(3, (1, 3, 3), padding='valid')(x)  # dilation_rate=(1, 2, 2) is not working
+    x = lr.Conv3D(3, (2, 1, 1), padding='valid')(x)
     x = lr.BatchNormalization()(x)
     outputs = lr.Activation('sigmoid')(x)
 
-    model = tf.keras.Model(
-        inputs={'image': im_inputs, 'audio': au_inputs},
-        outputs=outputs
-    )
+    model = tf.keras.Model(inputs={'image': im_inputs,
+                                   'audio': au_inputs},
+                           outputs=outputs)
 
     if save_plot:
         plot_model(model, dpi=70, show_shapes=True)
