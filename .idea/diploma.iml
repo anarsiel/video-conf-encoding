@@ -4,7 +4,6 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/dir2" />
       <excludeFolder url="file://$MODULE_DIR$/results" />
-      <excludeFolder url="file://$MODULE_DIR$/pre_processing/video/landmark_detectors/shape_predictors" />
       <excludeFolder url="file://$MODULE_DIR$/dataset_exmpls" />
       <excludeFolder url="file://$MODULE_DIR$/old/gan_minst/photos" />
       <excludeFolder url="file://$MODULE_DIR$/old/mfccs" />

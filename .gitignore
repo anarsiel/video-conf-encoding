@@ -1,7 +1,7 @@
 /dir2/
 /dir/
 /resources/
-/pre_processing/video/landmark_detectors/shape_predictors/
+#/pre_processing/video/landmark_detectors/shape_predictors/
 /results/
 /dataset_exmpls/
 /landmarks/
@@ -18,5 +18,6 @@
 /old/mfccs/
 /old/tmp/
 /old/dir/
-/dataset/
+/dataset_s1/
 /s1/
+/old/

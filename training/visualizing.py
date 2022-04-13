@@ -1,3 +1,6 @@
+from matplotlib import pyplot as plt
+
+
 def save_image(image, name="tmp.jpg"):
     ax = plt.subplot(3, 3, 1)
     plt.imshow(image.astype("uint8"))
