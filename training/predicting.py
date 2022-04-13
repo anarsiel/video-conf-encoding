@@ -18,8 +18,8 @@ model.compile(
 model.load_weights('weights.h5')
 
 trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY = load_dataset("../dataset_small")
-Y = model.predict({'frame': testFrame[1:2], 'mfccs': testMfccs[1:2]})
-Y = Y[0][0]
-Y = Y * 255.
+Y = model.predict({'image': testFrame[0:1], 'audio': testMfccs[0:1]})
 
-save_image(Y, "a.jpg")
+for idx, y in enumerate(Y[0]):
+    image = y * 255.
+    save_image(image, f"out/{idx}.jpg")
