@@ -2,50 +2,47 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
+from keras import backend as K
 
 from dataset_connector import load_dataset
 from model import create_model
-
-trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY = load_dataset("../dataset")
-
-# print(trainMfccs.shape)
-# print(testMfccs.shape, end='\n\n')
-#
-# print(trainFrame.shape)
-# print(testFrame.shape, end='\n\n')
-#
-# print(trainY.shape)
-# print(testY.shape, end='\n\n')
+import numpy as np
 
 
 model = create_model()
-keras.utils.plot_model(model, 'multi_input_and_output_model.png', show_shapes=True)
 
+adam = tf.keras.optimizers.Adam(0.1)
 model.compile(
     loss='mean_squared_error',
-    optimizer='adam',
+    optimizer=adam,
     metrics=['accuracy']
 )
 
-checkpoint_filepath = '/tmp/checkpoint'
+trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY = load_dataset("../dataset_s1")
+
+checkpoint_filepath = 'tmp'
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     verbose=1,
     save_weights_only=True,
-    save_freq=3
+    save_freq=50
 )
 
+old = np.array(model.layers[-2].weights)
 print("------TRAINING------")
 model.fit(
-    {'frame': trainFrame, 'mfccs': trainMfccs},
+    {'image': trainFrame, 'audio': trainMfccs},
     trainY,
-    epochs=10,
-    batch_size=32,
-    callbacks=[model_checkpoint_callback]
+    epochs=3,
+    batch_size=4,
+    # callbacks=[model_checkpoint_callback]
 )
+nnew = np.array(model.layers[-2].weights)
 
-model.save_weights('path_to_my_model.h5')
+print(nnew - old)
+
+model.save_weights('weights.h5')
 
 print("-------TESTING------")
-score = model.evaluate({'frame': testFrame, 'mfccs': testMfccs}, testY, verbose=0)
+score = model.evaluate({'image': testFrame, 'audio': testMfccs}, testY, verbose=0)
 print(score)
