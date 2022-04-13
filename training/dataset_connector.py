@@ -19,7 +19,7 @@ def load_dataset(source, for_train=0.8):
     files = [file for file in os.listdir(mfccs_dir) if check_mfcc_file(file)]
 
     frames = np.zeros(shape=(len(files), 24, 50, 60, 3), dtype=float)  # 25 - число кадров, 9000 = 50 * 60 * 3 - кадр
-    mfccs = np.zeros(shape=(len(files), 20, 43), dtype=float)  # 24 * 9000
+    mfccs = np.zeros(shape=(len(files), 43, 20), dtype=float)  # 24 * 9000
     input_frames = np.zeros(shape=(len(files), 50, 60, 3), dtype=float)
     for idx, file in enumerate(sorted(files)):
         filename = file.split('.')[0]
@@ -46,7 +46,8 @@ def load_mfccs(file):
     std = np.std(mfcc)
 
     mfcc = (mfcc - mean) / std
-    return mfcc
+
+    return mfcc.transpose()
 
 
 def load_frames(source_dir):
