@@ -9,11 +9,15 @@ from model import create_model
 import numpy as np
 
 
-model = create_model()
+model = create_model(save_plot=True)
+
+mse = tf.keras.losses.MeanSquaredError(
+    name='mean_squared_error'
+)
 
 adam = tf.keras.optimizers.Adam(0.1)
 model.compile(
-    loss='mean_squared_error',
+    loss=mse,
     optimizer=adam,
     metrics=['accuracy']
 )
@@ -23,9 +27,12 @@ trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY = load_dataset("../d
 checkpoint_filepath = 'tmp'
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
+    monitor="mean_squared_error",
+    mode="min",
+    save_best_only=True,
     verbose=1,
     save_weights_only=True,
-    save_freq=50
+    save_freq=10
 )
 
 old = np.array(model.layers[-2].weights)
@@ -34,8 +41,8 @@ model.fit(
     {'image': trainFrame, 'audio': trainMfccs},
     trainY,
     epochs=3,
-    batch_size=4,
-    # callbacks=[model_checkpoint_callback]
+    batch_size=16,
+    callbacks=[model_checkpoint_callback]
 )
 nnew = np.array(model.layers[-2].weights)
 
