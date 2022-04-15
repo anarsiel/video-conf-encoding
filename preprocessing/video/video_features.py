@@ -4,7 +4,7 @@ import dlib
 import numpy as np
 import shutil
 
-from pre_processing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image, \
+from preprocessing.video.landmark_detectors.common import get_landmarks_as_points, apply_points_to_image, \
     __shape_predictor_68, __shape_predictor_5
 
 

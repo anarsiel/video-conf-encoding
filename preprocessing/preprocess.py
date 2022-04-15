@@ -3,8 +3,8 @@ import shutil
 import warnings
 import numpy as np
 
-from pre_processing.audio.audio_features import get_mfccs
-from pre_processing.video.video_features import save_frames
+from preprocessing.audio.audio_features import get_mfccs
+from preprocessing.video.video_features import save_frames
 
 
 def create_dataset(source_dir, dest_dir):
@@ -31,14 +31,14 @@ def create_dataset(source_dir, dest_dir):
         try:
             save_mfccs(filepath, mfccs_dest_dir)
         except:
-            print(f"MFCC ERROR: {file}")
+            # print(f"MFCC ERROR: {file}")
             broken_files.append(file)
             continue
 
         try:
             save_frames(filepath, frames_dest_dir, cut=True, apply_landmarks=False)
 
-            print(f"preprocessed: {file}")
+            # print(f"preprocessed: {file}")
             success += 1
         except:
             os.remove(f"{mfccs_dest_dir}/{filename}_01.csv")
@@ -49,15 +49,13 @@ def create_dataset(source_dir, dest_dir):
             safe_delete_dir(f"{frames_dest_dir}/{filename}_01")
             safe_delete_dir(f"{frames_dest_dir}/{filename}_02")
             safe_delete_dir(f"{frames_dest_dir}/{filename}_03")
-            print(f"FRAMES ERROR: {file}")
+            # print(f"FRAMES ERROR: {file}")
             broken_files.append(file)
 
-    print("--------------------------------------")
-    print(f"Successfully preprocessed: {success} files.\nBroken: {len(broken_files)} files.\n")
+    # print("--------------------------------------")
+    # print(f"Successfully preprocessed: {success} files.\nBroken: {len(broken_files)} files.\n")
 
-    # TODO print broken_files_list to file
-
-
+    return success, broken_files
 
 
 def save_mfccs(file, mfccs_dest_dir):
