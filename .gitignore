@@ -1,7 +1,7 @@
 /dir2/
 /dir/
 /resources/
-#/pre_processing/video/landmark_detectors/shape_predictors/
+#/preprocessing/video/landmark_detectors/shape_predictors/
 /results/
 /dataset_exmpls/
 /landmarks/
