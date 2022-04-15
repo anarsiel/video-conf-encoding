@@ -40,9 +40,9 @@ print("------TRAINING------")
 model.fit(
     {'image': trainFrame, 'audio': trainMfccs},
     trainY,
-    epochs=3,
+    epochs=60,
     batch_size=16,
-    callbacks=[model_checkpoint_callback]
+    # callbacks=[model_checkpoint_callback]
 )
 nnew = np.array(model.layers[-2].weights)
 

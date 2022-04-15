@@ -8,6 +8,13 @@ def save_image(image, name="tmp.jpg"):
     plt.savefig(name)
 
 
+def save_image(image, name="tmp.jpg"):
+    ax = plt.subplot(3, 3, 1)
+    plt.imshow(image.astype("uint8"))
+    plt.axis("off")
+    plt.savefig(name)
+
+
 def read_image(source, image_shape=(50, 60)):
     image = tf.io.read_file(source)
     image = tf.io.decode_jpeg(image, channels=3)

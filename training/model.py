@@ -31,47 +31,48 @@ def create_model(save_plot=False):
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv2D(64, (3, 3), padding='same', strides=2)(x)
+    x = lr.Conv2D(64, (3, 3), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv2D(128, (3, 3), padding='same', strides=2)(x)
+    x = lr.Conv2D(128, (3, 3), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    z = lr.LSTM(x.shape[1] * x.shape[2])(au_inputs)
-    z = lr.Reshape(x.shape[1:-1] + [1])(z)
-    x = lr.Concatenate(-1)([x, z])
+    z = lr.Reshape(au_inputs.shape[1:] + [1, 1])(au_inputs)
     x = lr.Reshape([1] + x.shape[1:])(x)
 
-    x = lr.Conv3DTranspose(64, 3, strides=(3, 2, 2), padding='same')(x)
+    x = lr.UpSampling3D((z.shape[1] + 5, 1, 1))(x)
+    z = lr.UpSampling3D((1, 1, x.shape[3] - 5))(z)
+
+    z = lr.Conv3DTranspose(1, 5, padding='valid')(z)
+    z = lr.Conv3DTranspose(1, 2, padding='valid')(z)
+
+    x = lr.Concatenate(axis=-1)([x, z])
+
+    x = lr.Conv3D(256, 3, padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    z = lr.LSTM(x.shape[2] * x.shape[3])(au_inputs)
-    z = lr.Reshape([1] + x.shape[2:-1] + [1])(z)
-    z = lr.Conv3DTranspose(1, x.shape[1], strides=(x.shape[1], 1, 1), padding='same')(z)
-    x = lr.Concatenate(-1)([x, z])
-
-    x = lr.Conv3DTranspose(32, 3, strides=(3, 2, 2), padding='same')(x)
+    x = lr.Conv3DTranspose(128, 3, strides=(1, 2, 2), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    z = lr.LSTM(x.shape[2] * x.shape[3])(au_inputs)
-    z = lr.Reshape([1] + x.shape[2:-1] + [1])(z)
-    z = lr.Conv3DTranspose(1, x.shape[1], strides=(x.shape[1], 1, 1), padding='same')(z)
-    x = lr.Concatenate(-1)([x, z])
-
-    x = lr.Conv3DTranspose(16, 3, strides=(3, 2, 2), padding='same')(x)
+    x = lr.Conv3D(64, 3, padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv3D(8, (3, 5, 3), padding='valid')(x)
+    x = lr.Conv3D(32, 3, padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv3D(3, (1, 3, 3), padding='valid')(x)  # dilation_rate=(1, 2, 2) is not working
-    x = lr.Conv3D(3, (2, 1, 1), padding='valid')(x)
+    x = lr.AveragePooling3D((2, 1, 1))(x)
+
+    x = lr.Conv3D(16, 3, padding='same')(x)
+    x = lr.BatchNormalization()(x)
+    x = lr.Activation(ACT)(x)
+
+    x = lr.Conv3D(3, (1, 1, 1), padding='same')(x)
     x = lr.BatchNormalization()(x)
     outputs = lr.Activation('sigmoid')(x)
 
