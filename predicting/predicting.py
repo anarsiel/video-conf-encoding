@@ -9,7 +9,7 @@ import cv2
 
 from training.visualizing import save_image
 from preprocessing.preprocess import create_dataset
-from preprocessing.audio.audio_features import get_mfccs_for_precict
+from preprocessing.audio.audio_features import get_mfcc_for_predict
 from preprocessing.video.landmark_detectors.common import apply_points_to_image, get_landmarks_as_points, __shape_predictor_5
 from training.model import create_model
 from training import dataset_connector
@@ -17,7 +17,7 @@ from training import dataset_connector
 
 def predict(frame_source, audio_source, model=None, model_source=None, only_weights=True):
     # TODO feature extraction
-    mfcc = get_mfccs_for_precict(audio_source)
+    mfcc = get_mfcc_for_predict(audio_source)
 
     face_detector = dlib.get_frontal_face_detector()
     landmark_detector = dlib.shape_predictor(__shape_predictor_5)

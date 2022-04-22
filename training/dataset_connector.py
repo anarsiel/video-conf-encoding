@@ -8,6 +8,7 @@ from keras.datasets import mnist
 from matplotlib import pyplot as plt
 from PIL import Image
 import os
+import random
 
 np.random.seed(123)
 
@@ -16,7 +17,10 @@ def load_dataset(source, for_train=0.8):
     frames_dir = f"{source}/frames"
     mfccs_dir = f"{source}/mfccs"
 
-    files = [file for file in os.listdir(mfccs_dir) if check_mfcc_file(file)]
+    MU_AU = np.loadtxt("MU_AU.csv")
+    STD_AU = np.loadtxt("STD_AU.csv")
+
+    files = [file for file in os.listdir(mfccs_dir) if check_mfcc_file(file) and random.random() < 0.3]
 
     frames = np.zeros(shape=(len(files), 24, 50, 60, 3), dtype=float)  # 25 - число кадров, 9000 = 50 * 60 * 3 - кадр
     mfccs = np.zeros(shape=(len(files), 43, 20), dtype=float)  # 24 * 9000
@@ -24,7 +28,7 @@ def load_dataset(source, for_train=0.8):
     for idx, file in enumerate(sorted(files)):
         filename = file.split('.')[0]
 
-        file_mfccs = load_mfccs(f"{mfccs_dir}/{file}")
+        file_mfccs = load_mfccs(f"{mfccs_dir}/{file}", MU_AU, STD_AU)
         file_frames = load_frames(f"{frames_dir}/{filename}")
 
         input_frames[idx], frames[idx] = file_frames[0], file_frames[1:]
@@ -39,15 +43,15 @@ def load_dataset(source, for_train=0.8):
     return trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY
 
 
-def load_mfccs(file):
+def load_mfccs(file, MU_AU, STD_AU):
     mfcc = np.loadtxt(file)
 
-    mean = np.mean(mfcc)
-    std = np.std(mfcc)
+    # mean = np.mean(mfcc)
+    # std = np.std(mfcc)
+    mfcc = mfcc.transpose()
+    mfcc = (mfcc - MU_AU) / STD_AU
 
-    mfcc = (mfcc - mean) / std
-
-    return mfcc.transpose()
+    return mfcc
 
 
 def load_frames(source_dir):

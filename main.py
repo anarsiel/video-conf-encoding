@@ -1,19 +1,14 @@
-from preprocessing.preprocess import create_dataset
+from predicting.predicting import predict
+from PIL import Image
 
-success, broken_files = 0, []
-for person_id in range(1, 0):  # 35):
-    if person_id == 21:
-        continue
+image = Image.open('predicting/face2.jpeg')
+image.thumbnail((360, 360))
+image.save('image_400.jpg')
 
-    # s, bf = create_dataset(f"GRID/s{person_id}", "grid_dataset")
-
-    success += s
-    broken_files += bf
-
-    print(f"s{person_id} preprocessed")
-
-print(f"\nTotal files preprocessed: {success}. \nBroken files: {len(broken_files)}.")
-
-f = open("broken_files.txt", "w")
-f.write('\n'.join(broken_files))
-f.close()
+# predict("predicting/face.jpg", "predicting/University_ITMO.mp3", model_source="predicting/weights-2.h5", only_weights=True)
+predict(
+    "predicting/face.jpg",
+    "predicting/University_ITMO.mp3",
+    model_source="predicting/TimeDistributedModel/TimeDistributedModel",
+    only_weights=True
+)

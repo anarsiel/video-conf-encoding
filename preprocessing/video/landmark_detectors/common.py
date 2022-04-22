@@ -3,7 +3,7 @@ import dlib
 
 from preprocessing.video.landmark_detectors.indexes import Landmarks, landmarks_indexes, dlib5_indexes
 
-__shape_predictor_5 = "preprocessing/video/landmark_detectors/shape_predictors/shape_predictor_5_face_landmarks.dat"
+__shape_predictor_5 = "../preprocessing/video/landmark_detectors/shape_predictors/shape_predictor_5_face_landmarks.dat"
 __shape_predictor_68 = "preprocessing/video/landmark_detectors/shape_predictors/shape_predictor_68_face_landmarks.dat"
 
 
@@ -19,7 +19,7 @@ def get_only_wanted_points(all_faces_landmarks):
     points = []
     for face_landmarks in all_faces_landmarks:
         for idx, p in enumerate(face_landmarks.parts()):
-            if idx == 4:
+            if idx == 0 or idx == 2 or idx == 4:
                 points.append((p.x, p.y))
 
     return points

@@ -10,14 +10,11 @@ from keras.datasets import mnist
 from matplotlib import pyplot as plt
 from tensorflow.keras.utils import plot_model
 
-from dataset_connector import load_dataset
-
 
 def create_model(save_plot=False):
     INPUT_IMAGE_SHAPE = 50, 60, 3
-    INPUT_AUDIO_SHAPE = 43, 20  # (time, rows, channels)
-    OUTPUT_SHAPE = 25, 50, 60, 3
-
+    INPUT_AUDIO_SHAPE = 43, 20  # (time, rows)
+    OUTUT_SHAPE = 24, 50, 60, 3
     ACT = 'elu'
 
     im_inputs = lr.Input(INPUT_IMAGE_SHAPE, name='image')
@@ -25,17 +22,13 @@ def create_model(save_plot=False):
 
     x = lr.Conv2D(16, (3, 3), padding='same')(im_inputs)
     x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
+    inner_link = lr.Activation(ACT)(x)
 
-    x = lr.Conv2D(32, (3, 3), padding='same', strides=2)(x)
+    x = lr.Conv2D(32, (3, 3), padding='same', strides=2)(inner_link)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
     x = lr.Conv2D(64, (3, 3), padding='same')(x)
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-
-    x = lr.Conv2D(128, (3, 3), padding='same')(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
@@ -50,31 +43,26 @@ def create_model(save_plot=False):
 
     x = lr.Concatenate(axis=-1)([x, z])
 
-    x = lr.Conv3D(256, 3, padding='same')(x)
+    x = lr.TimeDistributed(lr.Conv2DTranspose(64, 3, strides=(2, 2), padding='same'))(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
+    x = lr.SpatialDropout3D(0.2)(x)
 
-    x = lr.Conv3DTranspose(128, 3, strides=(1, 2, 2), padding='same')(x)
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-
-    x = lr.Conv3D(64, 3, padding='same')(x)
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-
-    x = lr.Conv3D(32, 3, padding='same')(x)
-    x = lr.BatchNormalization()(x)
-    x = lr.Activation(ACT)(x)
-
+    x = lr.ConvLSTM2D(64, 3, padding='same', return_sequences=True)(x)
     x = lr.AveragePooling3D((2, 1, 1))(x)
 
-    x = lr.Conv3D(16, 3, padding='same')(x)
+    inner_link = lr.Reshape([1] + inner_link.shape[1:])(inner_link)
+    inner_link = lr.UpSampling3D((24, 1, 1))(inner_link)
+
+    x = lr.Concatenate(axis=-1)([x, inner_link])
+
+    x = lr.TimeDistributed(lr.Conv2D(32, 3, padding='same'))(x)
     x = lr.BatchNormalization()(x)
     x = lr.Activation(ACT)(x)
 
-    x = lr.Conv3D(3, (1, 1, 1), padding='same')(x)
-    x = lr.BatchNormalization()(x)
-    outputs = lr.Activation('sigmoid')(x)
+    x = lr.ConvLSTM2D(32, 3, padding='same', return_sequences=True)(x)
+    outputs = lr.ConvLSTM2D(3, 3, padding='same', return_sequences=True,
+                            activation='sigmoid')(x)
 
     model = tf.keras.Model(inputs={'image': im_inputs,
                                    'audio': au_inputs},

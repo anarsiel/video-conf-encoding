@@ -66,6 +66,7 @@ def fragmentate(source, dest_dir):
     if count != 75:
         raise Exception
 
+
 def get_third_number(x, cnt):
     if x * 3 < cnt:
         return 0

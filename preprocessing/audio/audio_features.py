@@ -23,6 +23,13 @@ def get_mfccs(source):
     return first, second, third
 
 
+def get_mfcc_for_predict(source):
+    x, sr = librosa.load(source)
+    mfccs = librosa.feature.mfcc(x, sr=sr)
+
+    return mfccs[:, :43]
+
+
 def get_mfccs_as_plot(source):
     x, sr = librosa.load(source)
     mfccs = librosa.feature.mfcc(x, sr=sr)  # [:, :65]

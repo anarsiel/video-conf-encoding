@@ -4,10 +4,17 @@ from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
 from keras import backend as K
 
-from dataset_connector import load_dataset
+# from dataset_connector import load_dataset
+from custom_dataset import get_datasets
 from model import create_model
 import numpy as np
 
+VIDEO_DIR = '../dataset_small/frames'
+AUDIO_DIR = '../dataset_small/mfccs'
+
+train_dataset, test_dataset, MU_AU, STD_AU = get_datasets(VIDEO_DIR, AUDIO_DIR)
+
+print(f"MU_AU: {MU_AU}\nSTD_AU: {STD_AU}\n")
 
 model = create_model(save_plot=True)
 
@@ -19,12 +26,10 @@ adam = tf.keras.optimizers.Adam(0.1)
 model.compile(
     loss=mse,
     optimizer=adam,
-    metrics=['accuracy']
+    metrics=['mean_squared_error']
 )
 
-trainMfccs, testMfccs, trainFrame, testFrame, trainY, testY = load_dataset("../dataset_s1")
-
-checkpoint_filepath = 'tmp'
+checkpoint_filepath = 'best_model.hdf5'
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     monitor="mean_squared_error",
@@ -32,24 +37,29 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     save_best_only=True,
     verbose=1,
     save_weights_only=True,
-    save_freq=10
 )
 
-old = np.array(model.layers[-2].weights)
 print("------TRAINING------")
-model.fit(
-    {'image': trainFrame, 'audio': trainMfccs},
-    trainY,
-    epochs=60,
-    batch_size=16,
-    # callbacks=[model_checkpoint_callback]
-)
-nnew = np.array(model.layers[-2].weights)
-
-print(nnew - old)
-
+model.fit(train_dataset,
+          validation_data=test_dataset,
+          epochs=2,
+          batch_size=4,
+          callbacks=[model_checkpoint_callback],
+          verbose=1
+          )
 model.save_weights('weights.h5')
 
 print("-------TESTING------")
-score = model.evaluate({'image': testFrame, 'audio': testMfccs}, testY, verbose=0)
+score = model.evaluate(test_dataset, verbose=0)
 print(score)
+
+# model = create_model()
+# model.compile(
+#     loss=mse,
+#     optimizer=adam,
+#     metrics=['mean_squared_error']
+# )
+# model.load_weights(checkpoint_filepath)
+# print("-------TESTING------")
+# score = model.evaluate({'image': testFrame, 'audio': testMfccs}, testY, verbose=0)
+# print(score)
