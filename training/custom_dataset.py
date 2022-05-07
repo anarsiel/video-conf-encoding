@@ -4,10 +4,10 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import numpy as np
 
-VIDEO_DIR = 'dataset_small/frames'
-AUDIO_DIR = 'dataset_small/mfccs'
+# VIDEO_DIR = 'dataset_small/frames'
+# AUDIO_DIR = 'dataset_small/mfccs'
 
-MU_AU, STD_AU = None, None
+# MU_AU, STD_AU = None, None
 
 
 def _intersection_filter(video_dirs, audio_paths):
@@ -63,10 +63,11 @@ class CustomDataGen(tf.keras.utils.Sequence):
                  frames=24,
                  batch_size=32,
                  shuffle=True,
-                 MU=127.,
-                 STD=127.,
+                 MU=0.,
+                 STD=255.,
                  MU_AU=MU_AU,
                  STD_AU=STD_AU,
+                 augmentator=tr,
                  ):
 
         self.video_dirs = np.array(video_dirs)
@@ -81,6 +82,7 @@ class CustomDataGen(tf.keras.utils.Sequence):
         self.STD = STD
         self.MU_AU = MU_AU
         self.STD_AU = STD_AU
+        self.augmentator = augmentator
         self._len = len(self.video_dirs) // self.batch_size + \
                     int(bool(len(self.video_dirs) % self.batch_size))
 
@@ -96,6 +98,7 @@ class CustomDataGen(tf.keras.utils.Sequence):
             np.random.shuffle(self.indexes)
 
     def __getitem__(self, index):
+
         start = index * self.batch_size
         end = min(start + self.batch_size, len(self.video_dirs))
         batch_indexes = self.indexes[start:end]
@@ -109,12 +112,14 @@ class CustomDataGen(tf.keras.utils.Sequence):
             vi_paths = sorted(list(vi_path.glob('*')), key=lambda x: int(x.stem))
             video = np.array([mpimg.imread(path) for path in vi_paths])
 
-            image_path = np.random.choice(vi_paths)
-            image = mpimg.imread(image_path)
+            video = tf.convert_to_tensor(video, tf.float32)
+            video = self.augmentator(video)
+
             image = video[0]
             image_batch = np.concatenate([image_batch, [image]])
 
             video = video[1:]
+
             video_batch = np.concatenate([video_batch, [video]])
 
             audio = np.genfromtxt(au_path).T
@@ -144,13 +149,13 @@ class CustomDataGen(tf.keras.utils.Sequence):
 
 def get_datasets(video_dir, audio_dir):
     video_dirs, audio_paths = get_preprocessing_paths(video_dir, audio_dir)
-    _data = train_test_split(video_dirs, audio_paths, test_size=0.25)
+    _data = train_test_split(video_dirs, audio_paths, test_size=0.10)
     train_video_dirs, test_video_dirs, train_audio_paths, test_audio_paths = _data
 
     MU_AU, STD_AU = get_audio_mu_std(audio_paths, count=100)
 
-    train_dataset = CustomDataGen(train_video_dirs, train_audio_paths, batch_size=2, MU_AU=MU_AU, STD_AU=STD_AU)
-    test_dataset = CustomDataGen(test_video_dirs, test_audio_paths, batch_size=2, MU_AU=MU_AU, STD_AU=STD_AU)
+    train_dataset = CustomDataGen(train_video_dirs, train_audio_paths, batch_size=8, MU_AU=MU_AU, STD_AU=STD_AU)
+    test_dataset = CustomDataGen(test_video_dirs, test_audio_paths, batch_size=8, MU_AU=MU_AU, STD_AU=STD_AU)
 
     return train_dataset, test_dataset, MU_AU, STD_AU
 
