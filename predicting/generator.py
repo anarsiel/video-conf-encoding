@@ -90,14 +90,15 @@ class Generator:
     def __put_mouth(self, frame, output_frames, nose):
         overlayed_frames = np.empty((output_frames.shape[0],) + frame.shape)
         for idx, output_frame in enumerate(output_frames):
-            output_frame = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
+            # output_frame = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
 
             overlay = np.copy(frame)
             overlay[nose[1]:nose[1] + 50, nose[0] - 30:nose[0] + 30] = output_frame
             overlayed_frames[idx] = overlay
         return overlayed_frames
 
-    def frames_to_video(self, frames, filename_extension):
+    @staticmethod
+    def frames_to_video(frames, filename_extension):
         filename, extension = filename_extension
         filename_g = f"{filename}_g"
 
