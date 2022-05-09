@@ -6,16 +6,23 @@ import cv2
 import os
 
 
-def change_res(source):
-    os.system(f'ffmpeg -y -i {source} -vf scale=280:-1 r_{source}')
+def check_video_file(file):
+    video_ext = ['mpg', 'mp4']
+    elements = file.split('.')
+    return elements[-1] in video_ext
 
 
 generator = Generator(
-    weights_path="predicting/current_best_v02.hdf5",
+    weights_path="predicting/weights.hdf5",
     shape_predictor_path="preprocessing/video/landmark_detectors/shape_predictors/shape_predictor_5_face_landmarks.dat",
     mu_au_path="predicting/MU_AU.csv",
     std_au_path="predicting/STD_AU.csv"
 )
 
-generator.generate_video("gg.mp4", 5)
-# generator.generate_video("sgwp8n.mpg", 5)
+source_dir = "resources/test"
+dest_dir = "generated"
+
+files = [file for file in os.listdir(source_dir) if check_video_file(file)]
+for file in files:
+    generator.generate_video(f"{source_dir}/{file}", dest_dir)
+    print(f"preprocessed: {file}")
