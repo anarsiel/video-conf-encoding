@@ -78,9 +78,6 @@ class Generator:
         return mfccs
 
     def __generate(self, frame, mfccs, t):
-        frame = np.expand_dims(frame, axis=0)
-        mfccs = np.expand_dims(mfccs, axis=0)
-
         Y = self.model.predict({'image': frame, 'audio': mfccs})
 
         Y *= self.STD
@@ -90,7 +87,7 @@ class Generator:
     def __put_mouth(self, frame, output_frames, nose):
         overlayed_frames = np.empty((output_frames.shape[0],) + frame.shape)
         for idx, output_frame in enumerate(output_frames):
-            # output_frame = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
+            output_frame = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
 
             overlay = np.copy(frame)
             overlay[nose[1]:nose[1] + 50, nose[0] - 30:nose[0] + 30] = output_frame
@@ -98,8 +95,8 @@ class Generator:
         return overlayed_frames
 
     @staticmethod
-    def frames_to_video(frames, filename_extension):
-        filename, extension = filename_extension
+    def frames_to_video(frames, source_path, dest_path):
+        filename, extension = source_path.split("/")[-1].split('.')
         filename_g = f"{filename}_g"
 
         height, width, layers = frames[0].shape
@@ -111,14 +108,13 @@ class Generator:
         cv2.destroyAllWindows()
         video.release()
 
-        os.system(f'ffmpeg -y -i {filename}.{extension} {filename}.mp3')
-        os.system(f'ffmpeg -y -i tmp.mp4 -i {filename}.mp3 -c:v copy -c:a aac {filename_g}.mp4')
+        os.system(f'ffmpeg -y -i {source_path} tmp.mp3')
+        os.system(f'ffmpeg -y -i tmp.mp4 -i tmp.mp3 -c:v copy -c:a aac {dest_path}"/"{filename_g}.mp4')
+        os.system(f'rm tmp.mp3 tmp.mp4')
 
-    def generate_video(self, path_to_video, t):
-        filename_extension = path_to_video.split("/")[-1].split('.')
-
-        frames, original_frames, noses = self.__fragmentate(path_to_video)
-        mfccs = self.__get_mfccs(path_to_video)
+    def generate_video(self, source_path, dest_path, t=5):
+        frames, original_frames, noses = self.__fragmentate(source_path)
+        mfccs = self.__get_mfccs(source_path)
 
         mfccs_len = len(mfccs)
         last = np.expand_dims(mfccs[mfccs_len - 1], axis=0)
@@ -128,10 +124,14 @@ class Generator:
         gen_frames = np.empty(original_frames.shape)
         for i in range(0, len(frames), t):
             print(i)
-            input_frame = copy.deepcopy(frames[i])
+            input_frame = copy.deepcopy(frames[i]).astype('float32')
+            input_frame = cv2.cvtColor(input_frame, cv2.COLOR_BGR2RGB)
 
             mfccs_starting_index = math.floor(43.0 * i / 25)
             input_mfccs = copy.deepcopy(mfccs[mfccs_starting_index:mfccs_starting_index + 43])
+
+            input_frame = np.expand_dims(input_frame, axis=0)
+            input_mfccs = np.expand_dims(input_mfccs, axis=0)
 
             output_frames = self.__generate(input_frame, input_mfccs, t)
             output_frames = self.__put_mouth(original_frames[i], output_frames, noses[i])
@@ -141,4 +141,4 @@ class Generator:
                 gen_frames[j] = output_frames[j - i - 1]
             # gen_frames = np.r_[gen_frames, np.array([input_frame]), output_frames]
 
-        self.frames_to_video(gen_frames, filename_extension)
+        self.frames_to_video(gen_frames, source_path, dest_path)
