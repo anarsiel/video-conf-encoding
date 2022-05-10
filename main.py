@@ -19,8 +19,8 @@ generator = Generator(
     std_au_path="predicting/STD_AU.csv"
 )
 
-source_dir = "resources/test"
-dest_dir = "generated"
+source_dir = "tmp-test"
+dest_dir = "tmp-gen"
 
 files = [file for file in os.listdir(source_dir) if check_video_file(file)]
 for file in files:

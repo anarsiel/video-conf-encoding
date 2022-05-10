@@ -95,7 +95,7 @@ class Generator:
         return overlayed_frames
 
     @staticmethod
-    def frames_to_video(frames, source_path, dest_path):
+    def frames_to_video(frames, source_path, dest_path, save_mp4):
         filename, extension = source_path.split("/")[-1].split('.')
         filename_g = f"{filename}_g"
 
@@ -110,9 +110,13 @@ class Generator:
 
         os.system(f'ffmpeg -y -i {source_path} tmp.mp3')
         os.system(f'ffmpeg -y -i tmp.mp4 -i tmp.mp3 -c:v copy -c:a aac {dest_path}"/"{filename_g}.mp4')
+        os.system(f'ffmpeg -i {dest_path}"/"{filename_g}.mp4 {dest_path}"/"{filename_g}.yuv')
+
+        if not save_mp4:
+            os.system(f'rm {dest_path}"/"{filename_g}.mp4')
         os.system(f'rm tmp.mp3 tmp.mp4')
 
-    def generate_video(self, source_path, dest_path, t=5):
+    def generate_video(self, source_path, dest_path, t=5, save_mp4=False):
         frames, original_frames, noses = self.__fragmentate(source_path)
         mfccs = self.__get_mfccs(source_path)
 
@@ -123,7 +127,6 @@ class Generator:
 
         gen_frames = np.empty(original_frames.shape)
         for i in range(0, len(frames), t):
-            print(i)
             input_frame = copy.deepcopy(frames[i]).astype('float32')
             input_frame = cv2.cvtColor(input_frame, cv2.COLOR_BGR2RGB)
 
@@ -141,4 +144,4 @@ class Generator:
                 gen_frames[j] = output_frames[j - i - 1]
             # gen_frames = np.r_[gen_frames, np.array([input_frame]), output_frames]
 
-        self.frames_to_video(gen_frames, source_path, dest_path)
+        self.frames_to_video(gen_frames, source_path, dest_path, save_mp4)
