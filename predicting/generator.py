@@ -46,14 +46,18 @@ class Generator:
         return points, image
 
     def __fragmentate(self, source):
-        vidcap = cv2.VideoCapture(source)
-        success, image = vidcap.read()
-        success = True
+        width, height = 288, 360
+        f = open(source, 'rb')
+        file_size = os.path.getsize(source)
+        n_frames = file_size // (width * height * 3 // 2)
 
         frames = []
         original_frames = []
         noses = []
-        while success:
+        for i in range(n_frames):
+            yuv = np.frombuffer(f.read(width * height * 3 // 2), dtype=np.uint8).reshape((height * 3 // 2, width))
+            image = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
+
             original_frames.append(image)
 
             points, image = self.__get_mouth(image)
@@ -63,8 +67,28 @@ class Generator:
             frames.append(image)
 
             noses.append(points[2])
+            # cv2.imwrite('rgb.jpg', bgr)
+        f.close()
 
-            success, image = vidcap.read()
+        # vidcap = cv2.VideoCapture(source)
+        # success, image = vidcap.read()
+        # success = True
+        #
+        # frames = []
+        # original_frames = []
+        # noses = []
+        # while success:
+        #     original_frames.append(image)
+        #
+        #     points, image = self.__get_mouth(image)
+        #     image = image.astype('float64')
+        #     image -= self.MU
+        #     image /= self.STD
+        #     frames.append(image)
+        #
+        #     noses.append(points[2])
+        #
+        #     success, image = vidcap.read()
 
         return np.array(frames), np.array(original_frames), noses
 
@@ -100,7 +124,7 @@ class Generator:
         filename_g = f"{filename}_g"
 
         height, width, layers = frames[0].shape
-        video = cv2.VideoWriter(f'tmp.mp4', cv2.VideoWriter_fourcc(*'DIVX'), 25, (width, height), True)
+        video = cv2.VideoWriter(f'{dest_path}/{filename_g}.yuv', None, 25, (width, height), True)
 
         for frame in frames:
             video.write(np.uint8(frame))
@@ -108,17 +132,17 @@ class Generator:
         cv2.destroyAllWindows()
         video.release()
 
-        os.system(f'ffmpeg -y -i {source_path} tmp.mp3')
-        os.system(f'ffmpeg -y -i tmp.mp4 -i tmp.mp3 -c:v copy -c:a aac {dest_path}"/"{filename_g}.mp4')
-        os.system(f'ffmpeg -i {dest_path}"/"{filename_g}.mp4 {dest_path}"/"{filename_g}.yuv')
+        # os.system(f'ffmpeg -y -i {source_path} tmp.mp3')
+        # os.system(f'ffmpeg -y -i tmp.mp4 -i tmp.mp3 -c:v copy -c:a aac {dest_path}"/"{filename_g}.mp4')
+        # os.system(f'ffmpeg -y -i {dest_path}"/"{filename_g}.mp4 {dest_path}"/"{filename_g}.yuv')
 
-        if not save_mp4:
-            os.system(f'rm {dest_path}"/"{filename_g}.mp4')
-        os.system(f'rm tmp.mp3 tmp.mp4')
+        # if not save_mp4:
+        #     os.system(f'rm {dest_path}"/"{filename_g}.mp4')
+        # os.system(f'rm tmp.mp3 tmp.mp4')
 
-    def generate_video(self, source_path, dest_path, t=5, save_mp4=False):
-        frames, original_frames, noses = self.__fragmentate(source_path)
-        mfccs = self.__get_mfccs(source_path)
+    def generate_video(self, video_source, audio_source, dest_path, t=5, save_mp4=False):
+        frames, original_frames, noses = self.__fragmentate(video_source)
+        mfccs = self.__get_mfccs(audio_source)
 
         mfccs_len = len(mfccs)
         last = np.expand_dims(mfccs[mfccs_len - 1], axis=0)
@@ -144,4 +168,4 @@ class Generator:
                 gen_frames[j] = output_frames[j - i - 1]
             # gen_frames = np.r_[gen_frames, np.array([input_frame]), output_frames]
 
-        self.frames_to_video(gen_frames, source_path, dest_path, save_mp4)
+        self.frames_to_video(gen_frames, video_source, dest_path, save_mp4)
