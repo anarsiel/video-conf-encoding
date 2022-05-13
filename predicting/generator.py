@@ -70,26 +70,6 @@ class Generator:
             # cv2.imwrite('rgb.jpg', bgr)
         f.close()
 
-        # vidcap = cv2.VideoCapture(source)
-        # success, image = vidcap.read()
-        # success = True
-        #
-        # frames = []
-        # original_frames = []
-        # noses = []
-        # while success:
-        #     original_frames.append(image)
-        #
-        #     points, image = self.__get_mouth(image)
-        #     image = image.astype('float64')
-        #     image -= self.MU
-        #     image /= self.STD
-        #     frames.append(image)
-        #
-        #     noses.append(points[2])
-        #
-        #     success, image = vidcap.read()
-
         return np.array(frames), np.array(original_frames), noses
 
     def __get_mfccs(self, source):
@@ -132,14 +112,6 @@ class Generator:
         cv2.destroyAllWindows()
         video.release()
 
-        # os.system(f'ffmpeg -y -i {source_path} tmp.mp3')
-        # os.system(f'ffmpeg -y -i tmp.mp4 -i tmp.mp3 -c:v copy -c:a aac {dest_path}"/"{filename_g}.mp4')
-        # os.system(f'ffmpeg -y -i {dest_path}"/"{filename_g}.mp4 {dest_path}"/"{filename_g}.yuv')
-
-        # if not save_mp4:
-        #     os.system(f'rm {dest_path}"/"{filename_g}.mp4')
-        # os.system(f'rm tmp.mp3 tmp.mp4')
-
     def generate_video(self, video_source, audio_source, dest_path, t=5, save_mp4=False):
         frames, original_frames, noses = self.__fragmentate(video_source)
         mfccs = self.__get_mfccs(audio_source)
@@ -166,6 +138,5 @@ class Generator:
             # gen_frames[i] = copy.deepcopy(original_frames[i])
             for j in range(i + 1, min(i + t, len(frames))):
                 gen_frames[j] = output_frames[j - i - 1]
-            # gen_frames = np.r_[gen_frames, np.array([input_frame]), output_frames]
 
         self.frames_to_video(gen_frames, video_source, dest_path, save_mp4)

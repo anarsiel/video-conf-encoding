@@ -20,31 +20,17 @@ generator = Generator(
 )
 
 video_source_dir = "test-video"
-# audio_source_dir = "test-audio"
 dest_dir = "test-x"
 
-# source_dir = "resources/test"
-# dest_dir = "results"
 
-# files = [file for file in os.listdir(source_dir) if check_video_file(file)]
-# for file in files:
-#     generator.generate_video(f"{source_dir}/{file}", dest_dir, save_mp4=True)
-#     print(f"preprocessed: {file}")
-
-# file = "12345"
-# generator.generate_video(
-#     video_source=f"{video_source_dir}/{file}.yuv",
-#     audio_source=f"{audio_source_dir}/{file}.mp4",
-#     dest_path=dest_dir,
-# )
-
-audio_file = "test-audio/12345.mp4"
+audio_file = "test-audio/sasha.wav"
 files = [file for file in os.listdir(video_source_dir) if check_video_file(file)]
 for file in files:
     generator.generate_video(
         video_source=f"{video_source_dir}/{file}",
         audio_source=audio_file,
         dest_path=dest_dir,
+        t=8
     )
 
     print(f'preprocessed: {file}')
