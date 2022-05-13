@@ -163,7 +163,7 @@ class Generator:
             output_frames = self.__generate(input_frame, input_mfccs, t)
             output_frames = self.__put_mouth(original_frames[i], output_frames, noses[i])
 
-            gen_frames[i] = copy.deepcopy(original_frames[i])
+            # gen_frames[i] = copy.deepcopy(original_frames[i])
             for j in range(i + 1, min(i + t, len(frames))):
                 gen_frames[j] = output_frames[j - i - 1]
             # gen_frames = np.r_[gen_frames, np.array([input_frame]), output_frames]
