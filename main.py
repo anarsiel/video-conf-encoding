@@ -23,12 +23,13 @@ video_source_dir = "test-video"
 dest_dir = "test-x"
 
 
-audio_file = "test-audio/sasha.wav"
+# audio_file = "test-audio/sasha.wav"
 files = [file for file in os.listdir(video_source_dir) if check_video_file(file)]
 for file in files:
+    filename = file.split('.')[0]
     generator.generate_video(
         video_source=f"{video_source_dir}/{file}",
-        audio_source=audio_file,
+        audio_source=f'test-audio/12345.mov',
         dest_path=dest_dir,
         t=8
     )
